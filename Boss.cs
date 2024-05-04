@@ -95,6 +95,6 @@ public partial class Boss : CharacterBody2D
 		}
 		AnimationUpdate();
 		Velocity = velocity;
-		GD.Print("boss", velocity);
+		GD.Print("boss is fast af?", velocity);
 	}
 }
