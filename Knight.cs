@@ -107,7 +107,6 @@ public partial class Knight : CharacterBody2D
             knight = body as Knight;
             QueueFree();
         }
-        QueueFree();
     }
 }
 
