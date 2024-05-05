@@ -138,11 +138,6 @@ public partial class Knight : CharacterBody2D
     }
     private void OnDeathLineBodyEntered(Node2D body)
     {
-        if (body is Knight)
-        {
-            knight = body as Knight;
-            QueueFree();
-        }
         QueueFree();
     }
     private void AttackAnimFinished()
