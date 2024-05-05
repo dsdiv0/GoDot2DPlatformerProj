@@ -7,8 +7,6 @@ public partial class Knight : CharacterBody2D
     private AnimationPlayer ap;
     private Sprite2D sprite;
     private Area2D hitbox;
-    private bool attacking;
-    private bool rolling;
     public int Khealth = 10;
     private ProgressBar healthbar;
     private Knight knight;
