@@ -1,4 +1,4 @@
-[gd_scene load_steps=55 format=3 uid="uid://ckh25fhojeesc"]
+[gd_scene load_steps=52 format=3 uid="uid://ckh25fhojeesc"]
 
 [ext_resource type="Texture2D" uid="uid://dibl6cl2rchve" path="res://KnightSprite/_Idle.png" id="1_vhx05"]
 [ext_resource type="Script" path="res://KnightSprite/Knight.cs" id="1_vlwas"]
@@ -148,7 +148,6 @@ tracks/3/keys = {
 [sub_resource type="Animation" id="Animation_t6uqm"]
 resource_name = "FallRight"
 length = 0.15
-loop_mode = 1
 step = 0.05
 tracks/0/type = "value"
 tracks/0/imported = false
@@ -197,6 +196,20 @@ tracks/3/keys = {
 "transitions": PackedFloat32Array(1, 1, 1),
 "update": 1,
 "values": [0, 1, 2]
+}
+tracks/4/type = "method"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath(".")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0.1),
+"transitions": PackedFloat32Array(1),
+"values": [{
+"args": [],
+"method": &"FallAnimFinished"
+}]
 }
 
 [sub_resource type="Animation" id="Animation_8g2rn"]
@@ -534,14 +547,9 @@ blend_mode = 1
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_dq4t0"]
 animation = &"Fall"
 
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_g5tmn"]
-animation = &"Fall"
-
 [sub_resource type="AnimationNodeBlendSpace1D" id="AnimationNodeBlendSpace1D_qat6p"]
 blend_point_0/node = SubResource("AnimationNodeAnimation_dq4t0")
-blend_point_0/pos = -1.0
-blend_point_1/node = SubResource("AnimationNodeAnimation_g5tmn")
-blend_point_1/pos = 1.0
+blend_point_0/pos = 0.0
 blend_mode = 1
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_4o8ll"]
@@ -607,31 +615,29 @@ advance_mode = 2
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_rycua"]
 
-[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_833bu"]
-
-[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_gkhlc"]
-switch_mode = 1
-
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_fo7xf"]
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_8iepi"]
 
-[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_gxmwq"]
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_32rfw"]
+switch_mode = 2
+advance_mode = 2
 
 [sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_nb8oh"]
 states/Attack/node = SubResource("AnimationNodeBlendSpace1D_eqmgd")
-states/Attack/position = Vector2(104, 357)
-states/End/position = Vector2(1051, 103)
+states/Attack/position = Vector2(103, 357)
+states/End/position = Vector2(1053, 102)
 states/Fall/node = SubResource("AnimationNodeBlendSpace1D_qat6p")
-states/Fall/position = Vector2(759, 255)
+states/Fall/position = Vector2(597, 196)
 states/Jump/node = SubResource("AnimationNodeBlendSpace1D_wlvru")
-states/Jump/position = Vector2(535, 255)
+states/Jump/position = Vector2(591, 255)
 states/Roll/node = SubResource("AnimationNodeBlendSpace1D_2qsui")
-states/Roll/position = Vector2(1104, 357)
+states/Roll/position = Vector2(1106, 357)
 states/Run/node = SubResource("AnimationNodeBlendSpace1D_ctgk1")
-states/Run/position = Vector2(578, 45)
+states/Run/position = Vector2(597, 45)
 states/Start/position = Vector2(267, 45)
-transitions = ["Start", "Run", SubResource("AnimationNodeStateMachineTransition_y4y0k"), "Run", "Attack", SubResource("AnimationNodeStateMachineTransition_x3qct"), "Run", "Roll", SubResource("AnimationNodeStateMachineTransition_j43r4"), "Attack", "Run", SubResource("AnimationNodeStateMachineTransition_pdlxe"), "Roll", "Run", SubResource("AnimationNodeStateMachineTransition_itrbp"), "Attack", "Roll", SubResource("AnimationNodeStateMachineTransition_rhuxr"), "Roll", "Attack", SubResource("AnimationNodeStateMachineTransition_rycua"), "Run", "Jump", SubResource("AnimationNodeStateMachineTransition_833bu"), "Jump", "Fall", SubResource("AnimationNodeStateMachineTransition_gkhlc"), "Attack", "Jump", SubResource("AnimationNodeStateMachineTransition_fo7xf"), "Roll", "Jump", SubResource("AnimationNodeStateMachineTransition_8iepi"), "Run", "Fall", SubResource("AnimationNodeStateMachineTransition_gxmwq")]
+transitions = ["Start", "Run", SubResource("AnimationNodeStateMachineTransition_y4y0k"), "Run", "Attack", SubResource("AnimationNodeStateMachineTransition_x3qct"), "Run", "Roll", SubResource("AnimationNodeStateMachineTransition_j43r4"), "Attack", "Run", SubResource("AnimationNodeStateMachineTransition_pdlxe"), "Roll", "Run", SubResource("AnimationNodeStateMachineTransition_itrbp"), "Attack", "Roll", SubResource("AnimationNodeStateMachineTransition_rhuxr"), "Roll", "Attack", SubResource("AnimationNodeStateMachineTransition_rycua"), "Attack", "Jump", SubResource("AnimationNodeStateMachineTransition_fo7xf"), "Roll", "Jump", SubResource("AnimationNodeStateMachineTransition_8iepi"), "Fall", "Run", SubResource("AnimationNodeStateMachineTransition_32rfw")]
+graph_offset = Vector2(0, 1.12057e-05)
 
 [node name="Knight" type="CharacterBody2D"]
 collision_layer = 2
@@ -644,14 +650,13 @@ collision_mask = 4
 
 [node name="CollisionShape2D" parent="Hurtbox" index="0"]
 shape = SubResource("CapsuleShape2D_ndsnp")
-disabled = true
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture_filter = 1
 position = Vector2(5, -40)
-texture = ExtResource("13_75q3j")
-hframes = 3
-frame = 2
+texture = ExtResource("1_vhx05")
+hframes = 10
+frame = 1
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {
@@ -689,7 +694,6 @@ step = 1.0
 value = 10.0
 
 [node name="AnimationTree" type="AnimationTree" parent="."]
-active = false
 libraries = {
 "": SubResource("AnimationLibrary_im6cj")
 }
