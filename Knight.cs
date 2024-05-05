@@ -148,6 +148,15 @@ public partial class Knight : CharacterBody2D
     {
         state = State.MOVE;
     }
+    private void FallAnimFinished()
+    {
+        Vector2 velocity = Velocity;
+        if (velocity.Y == 0)
+        {
+            state = State.MOVE;
+        }
+        Velocity = velocity;
+    }
 }
 
 
