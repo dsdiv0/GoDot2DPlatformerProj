@@ -7,11 +7,21 @@ public partial class Knight : CharacterBody2D
     private AnimationPlayer ap;
     private Sprite2D sprite;
     private Area2D hitbox;
-    [Export] public bool attacking = false ;
-    [Export] public bool rolling = false ;
+    private bool attacking;
+    private bool rolling;
     public int Khealth = 10;
     private ProgressBar healthbar;
     private Knight knight;
+    private AnimationTree at;
+    private enum State
+    {
+        MOVE,
+        ROLL,
+        ATTACK,
+        JUMP,
+        FALL
+    }
+    State state;
     public override void _Ready()
     {
         base._Ready();
@@ -19,63 +29,11 @@ public partial class Knight : CharacterBody2D
         sprite = GetNode<Sprite2D>("Sprite2D");
         hitbox = GetNode<Area2D>("HitboxPivot/SwordHitbox");
         healthbar = GetNode<ProgressBar>("Healthbar");
-    }
-    public void OnHurtboxAreaEntered(Area2D area)
-    {
-        Khealth -= 1;
-        healthbar.Value = Khealth;
-        GD.Print(Khealth);
+        at = GetNode<AnimationTree>("AnimationTree");
+        at.Active = true;
     }
 
-    public void UpdateAnimation()
-    {
-        Vector2 velocity = Velocity;
-        Velocity = velocity;
-        if (IsOnFloor())
-        {
-            if (!attacking && !rolling)
-            {
-                if (velocity.X != 0)
-                {
-                    ap.Play("Run");
-                }
-                else ap.Play("Idle");
-            }
-        }
-
-        if (velocity.Y < 0)
-        {
-            ap.Play("Jump");
-        }
-        else if (velocity.Y > 0)
-        {
-            ap.Play("Fall");
-        }
-
-    }
-    public override void _Process(double delta)
-    {
-        if (Input.IsActionJustPressed("attack"))
-        {
-            Attack();
-        }
-        if (Input.IsActionJustPressed("roll"))
-        {
-            Roll();
-        }
-    }
-    public void Attack()
-    {
-        attacking = true;
-        ap.Play("Attack");
-    }
-    public void Roll()
-    {
-        rolling = true;
-        ap.Play("Roll");
-    }
-
-    public override void _PhysicsProcess(double delta)
+    private void Movement()
     {
         Vector2 velocity = Velocity;
         var input = Input.GetAxis("move_left", "move_right");
@@ -92,21 +50,108 @@ public partial class Knight : CharacterBody2D
         {
             velocity.Y = -JumpForce;
         }
+        Velocity = velocity;
+        at.Set("parameters/Run/blend_position", input);
+        at.Set("parameters/Attack/blend_position", 0);
+        at.Set("parameters/Roll/blend_position", 0);
+        at.Set("parameters/Jump/blend_position", 0);
+        at.Set("parameters/Fall/blend_position", 0);
+    }
+    public override void _Process(double delta)
+    {
+        Vector2 velocity = Velocity;
+        if (Input.IsActionJustPressed("attack"))
+        {
+            state = State.ATTACK;
+        }
+        if (Input.IsActionJustPressed("roll"))
+        {
+            state = State.ROLL;
+        }
+        if (velocity.Y < 0)
+        {
+            state = State.JUMP;
+        }
+        if (velocity.Y > 0)
+        {
+            state = State.FALL;
+        }
+        Velocity = velocity;
+    }
+    public void AttackState()
+    {
+        var stateMachine = GetNode<AnimationTree>("AnimationTree").Get("parameters/playback").As<AnimationNodeStateMachinePlayback>();
+        stateMachine.Travel("Attack");
+        MoveAndSlide();
+    }
+    public void RollState()
+    {
+        var stateMachine = GetNode<AnimationTree>("AnimationTree").Get("parameters/playback").As<AnimationNodeStateMachinePlayback>();
+        stateMachine.Travel("Roll");
+        MoveAndSlide();
+    }
+    public void JumpState()
+    {
+        var stateMachine = GetNode<AnimationTree>("AnimationTree").Get("parameters/playback").As<AnimationNodeStateMachinePlayback>();
+        stateMachine.Travel("Jump");
+        MoveAndSlide();
+    }
+    public void FallState()
+    {
+        var stateMachine = GetNode<AnimationTree>("AnimationTree").Get("parameters/playback").As<AnimationNodeStateMachinePlayback>();
+        stateMachine.Travel("Fall");
+        MoveAndSlide();
+    }
+
+    public override void _PhysicsProcess(double delta)
+    {
+        Movement();
+        GD.Print("playa" + Velocity);
+        switch (state)
+        {
+            case State.MOVE:
+                MoveAndSlide();
+                break;
+            case State.ROLL:
+                RollState();
+                break;
+            case State.ATTACK:
+                AttackState();
+                break;
+            case State.JUMP:
+                JumpState();
+                break;
+            case State.FALL:
+                FallState();
+                break;
+        }
         if (Khealth <= 0)
         {
             QueueFree();
         }
-        Velocity = velocity;
-        UpdateAnimation();
-        MoveAndSlide();
     }
-    private void OOnDeathLineBodyEntered(Node2D body)
+    public void OnHurtboxAreaEntered(Area2D area)
+    {
+        Khealth -= 1;
+        healthbar.Value = Khealth;
+        GD.Print(Khealth);
+    }
+    private void OnDeathLineBodyEntered(Node2D body)
     {
         if (body is Knight)
         {
             knight = body as Knight;
             QueueFree();
         }
+        QueueFree();
+    }
+    private void AttackAnimFinished()
+    {
+        state = State.MOVE;
+    }
+    private void RollingAnimFinished()
+    {
+        state = State.MOVE;
     }
 }
 
