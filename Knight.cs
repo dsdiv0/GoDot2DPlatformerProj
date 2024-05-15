@@ -4,13 +4,15 @@ public partial class Knight : CharacterBody2D
     private float Speed = 150;
     private float JumpForce = 500;
     private float Gravity = 20;
-    private AnimationPlayer ap;
     private Sprite2D sprite;
     private Area2D hitbox;
-    public int Khealth = 10;
+    private bool attacking;
+    private bool rolling;
+    private int Khealth = 10;
     private ProgressBar healthbar;
-    private Knight knight;
     private AnimationTree at;
+    private CollisionShape2D swordHit;
+    private CollisionShape2D playerHitbox;
     private enum State
     {
         MOVE,
@@ -23,12 +25,13 @@ public partial class Knight : CharacterBody2D
     public override void _Ready()
     {
         base._Ready();
-        ap = GetNode<AnimationPlayer>("AnimationPlayer");
         sprite = GetNode<Sprite2D>("Sprite2D");
         hitbox = GetNode<Area2D>("HitboxPivot/SwordHitbox");
         healthbar = GetNode<ProgressBar>("Healthbar");
         at = GetNode<AnimationTree>("AnimationTree");
         at.Active = true;
+        swordHit = GetNode<CollisionShape2D>("HitboxPivot/SwordHitbox/CollisionShape2D2");
+        playerHitbox = GetNode<CollisionShape2D>("Hurtbox/CollisionShape2D");
     }
 
     private void Movement()
@@ -81,24 +84,30 @@ public partial class Knight : CharacterBody2D
         var stateMachine = GetNode<AnimationTree>("AnimationTree").Get("parameters/playback").As<AnimationNodeStateMachinePlayback>();
         stateMachine.Travel("Attack");
         MoveAndSlide();
+        playerHitbox.Disabled = false;
     }
     public void RollState()
     {
         var stateMachine = GetNode<AnimationTree>("AnimationTree").Get("parameters/playback").As<AnimationNodeStateMachinePlayback>();
         stateMachine.Travel("Roll");
         MoveAndSlide();
+        swordHit.Disabled = true;
     }
     public void JumpState()
     {
         var stateMachine = GetNode<AnimationTree>("AnimationTree").Get("parameters/playback").As<AnimationNodeStateMachinePlayback>();
         stateMachine.Travel("Jump");
         MoveAndSlide();
+        swordHit.Disabled = true;
+        playerHitbox.Disabled = false;
     }
     public void FallState()
     {
         var stateMachine = GetNode<AnimationTree>("AnimationTree").Get("parameters/playback").As<AnimationNodeStateMachinePlayback>();
         stateMachine.Travel("Fall");
         MoveAndSlide();
+        swordHit.Disabled = true;
+        playerHitbox.Disabled = false;
     }
 
     public override void _PhysicsProcess(double delta)
